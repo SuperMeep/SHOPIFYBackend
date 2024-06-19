@@ -5,7 +5,7 @@
 
 
 # Ignore Firebase admin SDK JSON file in the config directory
-constants/shopify-56c1c-firebase-adminsdk-vt7zl-9a1beed339.json
+/constants/shopify-56c1c-firebase-adminsdk-vt7zl-9a1beed339.json
 
 # production
 /build
