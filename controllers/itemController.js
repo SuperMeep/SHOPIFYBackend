@@ -42,32 +42,38 @@ const getItem = asyncHandler(async (req, res) => {
   res.status(200).json(itemSnapshot.val());
 });
 
-// create an item
 const createItem = asyncHandler(async (req, res) => {
   const { category, name, options, price, cost, stock, image } = req.body;
   const owner = req.user.userId;
 
   console.log("Request Body:", req.body);
 
-  // Map options to ensure they have the correct structure
-  const optionsArray = options.map((option) => ({
-    name: option.name,
-    subcategories: [option.subcategory],
-  }));
+  if (!Array.isArray(options)) {
+    console.error("Invalid options format:", options);
+    return res.status(400).json({ error: "Options must be an array" });
+  }
+
+  const optionsArray = options.map((option) => {
+    if (!option.name || !Array.isArray(option.subcategories)) {
+      console.error("Invalid option format:", option);
+      throw new Error("Invalid option format");
+    }
+    return {
+      name: option.name,
+      subcategories: option.subcategories,
+    };
+  });
 
   console.log("Options Array:", optionsArray);
 
-  // Map the image data to match the frontend format
   const imageUrls = image.map(({ public_id }) => ({
     public_id,
   }));
 
   console.log("Image URLs:", imageUrls);
 
-  // Create a new item reference with a unique ID
   const newItemRef = db.ref("items").push();
 
-  // Set the new item data in the database
   await newItemRef.set({
     id: newItemRef.key,
     category,
@@ -80,7 +86,6 @@ const createItem = asyncHandler(async (req, res) => {
     owner,
   });
 
-  // Send the response
   res.status(200).json({
     id: newItemRef.key,
     category,
@@ -93,6 +98,8 @@ const createItem = asyncHandler(async (req, res) => {
     owner,
   });
 });
+
+// po
 
 // delete an item
 const deleteItem = asyncHandler(async (req, res) => {
